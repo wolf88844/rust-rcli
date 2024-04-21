@@ -1,3 +1,4 @@
+#[warn(unused_imports)]
 use anyhow::Result;
 use clap::Parser;
 use rcli::{process_csv, process_genpass, Opts, SubCommand};
