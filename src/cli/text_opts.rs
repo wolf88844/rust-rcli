@@ -13,6 +13,10 @@ pub enum TextSubCommand {
     Verify(TextVerifyOpt),
     #[command(about = "Generate a randow blake3 or ed25519 key")]
     Generate(KeyGenerateOpt),
+    #[command(about = "encrypt text")]
+    Encrypt(TextEncryptOpt),
+    #[command(about = "decrypt text")]
+    Decrypt(TextDecryptOpt),
 }
 
 #[derive(Debug, Parser)]
@@ -43,6 +47,22 @@ pub struct KeyGenerateOpt {
     pub format: TextSignFormat,
     #[arg(short, long,value_parser=verify_path)]
     pub output_path: PathBuf,
+}
+
+#[derive(Debug, Parser)]
+pub struct TextEncryptOpt {
+    #[arg(short,long,value_parser=verify_file,default_value="-")]
+    pub input: String,
+    #[arg(short, long)]
+    pub key: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct TextDecryptOpt {
+    #[arg(short,long,value_parser=verify_file,default_value="-")]
+    pub input: String,
+    #[arg(short, long)]
+    pub key: String,
 }
 
 #[derive(Debug, Clone, Copy)]

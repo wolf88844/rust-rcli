@@ -9,7 +9,9 @@ pub use baes64_opts::{Base64Format, Base64SubCommand};
 use clap::Parser;
 pub use csv_opts::{CsvOpts, OutputFormat};
 pub use genpass_opts::GenPassOpts;
-pub use text_opts::{TextSignFormat, TextSignOpt, TextSubCommand, TextVerifyOpt};
+pub use text_opts::{
+    TextDecryptOpt, TextEncryptOpt, TextSignFormat, TextSignOpt, TextSubCommand, TextVerifyOpt,
+};
 
 #[derive(Debug, Parser)]
 #[command(name = "rcil", version, author)]
