@@ -1,9 +1,9 @@
 use core::fmt;
 use std::{path::PathBuf, str::FromStr};
 
-use clap::Parser;
+use clap::{arg, Parser};
 
-use super::{verify_file, verify_path};
+use super::{verify_file, verify_key, verify_path};
 
 #[derive(Debug, Parser)]
 pub enum TextSubCommand {
@@ -53,7 +53,7 @@ pub struct KeyGenerateOpt {
 pub struct TextEncryptOpt {
     #[arg(short,long,value_parser=verify_file,default_value="-")]
     pub input: String,
-    #[arg(short, long)]
+    #[arg(short, long,value_parser=verify_key)]
     pub key: String,
 }
 
@@ -61,7 +61,7 @@ pub struct TextEncryptOpt {
 pub struct TextDecryptOpt {
     #[arg(short,long,value_parser=verify_file,default_value="-")]
     pub input: String,
-    #[arg(short, long)]
+    #[arg(short, long,value_parser=verify_key)]
     pub key: String,
 }
 

@@ -49,6 +49,14 @@ fn verify_path(path: &str) -> Result<PathBuf, &'static str> {
     }
 }
 
+fn verify_key(key: &str) -> Result<String, &'static str> {
+    if key.len() >= 32 {
+        Ok(key.into())
+    } else {
+        Err("key length must be or more than 32")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
