@@ -1,10 +1,15 @@
+use std::fs;
+
 #[warn(unused_imports)]
 use anyhow::Result;
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use clap::Parser;
 use rcli::{
-    process_csv, process_decode, process_encode, process_genpass, Base64SubCommand, Opts,
-    SubCommand,
+    get_content, get_reader, process_csv, process_decode, process_encode, process_genpass,
+    process_text_key_generate, process_text_sign, process_text_verify, Base64SubCommand, Opts,
+    SubCommand, TextSubCommand,
 };
+use zxcvbn::zxcvbn;
 
 fn main() -> Result<()> {
     let opts = Opts::parse();
@@ -18,20 +23,54 @@ fn main() -> Result<()> {
             process_csv(&opts.input, output, opts.format)?;
         }
         SubCommand::GenPass(opts) => {
-            process_genpass(
+            let password = process_genpass(
                 opts.length,
                 opts.has_uppercase,
                 opts.has_lowercase,
                 opts.has_number,
                 opts.has_symbol,
             )?;
+            println!("{}", password);
+
+            let estimate = zxcvbn(&password, &[])?;
+            eprintln!("Password strength: {}", estimate.score());
         }
         SubCommand::Base64(subcmd) => match subcmd {
             Base64SubCommand::Encode(opts) => {
-                process_encode(&opts.input, opts.format)?;
+                let mut reader = get_reader(&opts.input)?;
+                let encode = process_encode(&mut reader, opts.format)?;
+                println!("encode:{}", encode);
             }
             Base64SubCommand::Decode(opts) => {
-                process_decode(&opts.input, opts.format)?;
+                let mut reader = get_reader(&opts.input)?;
+                let decoded = process_decode(&mut reader, opts.format)?;
+                println!("decoded:{}", decoded);
+            }
+        },
+        SubCommand::Text(subcmd) => match subcmd {
+            TextSubCommand::Sign(opts) => {
+                let mut reader = get_reader(&opts.input)?;
+                let key = get_content(&opts.key)?;
+                let sig = process_text_sign(&mut reader, &key, opts.format)?;
+                let encoded = URL_SAFE_NO_PAD.encode(sig);
+                println!("sig:{}", encoded);
+            }
+            TextSubCommand::Generate(opts) => {
+                let map = process_text_key_generate(opts.format)?;
+                for (k, v) in map {
+                    fs::write(opts.output_path.join(k), v)?;
+                }
+            }
+            TextSubCommand::Verify(opts) => {
+                let mut reader = get_reader(&opts.input)?;
+                let key = get_content(&opts.key)?;
+                let decoded = URL_SAFE_NO_PAD.decode(&opts.sig)?;
+                let verified = process_text_verify(&mut reader, &key, &decoded, opts.format)?;
+                if verified {
+                    println!("verified");
+                } else {
+                    println!("not verified");
+                }
             }
         },
     }

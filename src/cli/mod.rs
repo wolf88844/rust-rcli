@@ -1,13 +1,15 @@
 mod baes64_opts;
 mod csv_opts;
 mod genpass_opts;
+mod text_opts;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub use baes64_opts::{Base64Format, Base64SubCommand};
 use clap::Parser;
 pub use csv_opts::{CsvOpts, OutputFormat};
 pub use genpass_opts::GenPassOpts;
+pub use text_opts::{TextSignFormat, TextSignOpt, TextSubCommand, TextVerifyOpt};
 
 #[derive(Debug, Parser)]
 #[command(name = "rcil", version, author)]
@@ -24,6 +26,8 @@ pub enum SubCommand {
     GenPass(GenPassOpts),
     #[command(subcommand)]
     Base64(Base64SubCommand),
+    #[command(subcommand)]
+    Text(TextSubCommand),
 }
 
 fn verify_file(filename: &str) -> Result<String, &'static str> {
@@ -31,6 +35,15 @@ fn verify_file(filename: &str) -> Result<String, &'static str> {
         Ok(filename.into())
     } else {
         Err("File does not exist")
+    }
+}
+
+fn verify_path(path: &str) -> Result<PathBuf, &'static str> {
+    let p = Path::new(path);
+    if p.exists() && p.is_dir() {
+        Ok(path.into())
+    } else {
+        Err("path does not exist or is not a directory")
     }
 }
 
