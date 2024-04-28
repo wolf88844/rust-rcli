@@ -17,6 +17,8 @@ pub enum TextSubCommand {
     Encrypt(TextEncryptOpt),
     #[command(about = "decrypt text")]
     Decrypt(TextDecryptOpt),
+    #[command(about = "generate a random key")]
+    GenerateNonce(NonceGenerateOpt),
 }
 
 #[derive(Debug, Parser)]
@@ -50,11 +52,19 @@ pub struct KeyGenerateOpt {
 }
 
 #[derive(Debug, Parser)]
+pub struct NonceGenerateOpt {
+    #[arg(short, long,value_parser=verify_path)]
+    pub output_path: PathBuf,
+}
+
+#[derive(Debug, Parser)]
 pub struct TextEncryptOpt {
     #[arg(short,long,value_parser=verify_file,default_value="-")]
     pub input: String,
     #[arg(short, long,value_parser=verify_key)]
     pub key: String,
+    #[arg(short, long,value_parser=verify_file,default_value="fixtures/chacha2.nonce")]
+    pub nonce: String,
 }
 
 #[derive(Debug, Parser)]
@@ -63,6 +73,8 @@ pub struct TextDecryptOpt {
     pub input: String,
     #[arg(short, long,value_parser=verify_key)]
     pub key: String,
+    #[arg(short, long,value_parser=verify_file,default_value="fixtures/chacha2.nonce")]
+    pub nonce: String,
 }
 
 #[derive(Debug, Clone, Copy)]

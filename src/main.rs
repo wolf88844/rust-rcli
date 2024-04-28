@@ -6,8 +6,9 @@ use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use clap::Parser;
 use rcli::{
     get_content, get_reader, process_csv, process_decode, process_encode, process_genpass,
-    process_text_decrypt, process_text_encrypt, process_text_key_generate, process_text_sign,
-    process_text_verify, Base64SubCommand, Opts, SubCommand, TextSubCommand,
+    process_text_decrypt, process_text_encrypt, process_text_key_generate,
+    process_text_nonce_generate, process_text_sign, process_text_verify, Base64SubCommand, Opts,
+    SubCommand, TextSubCommand,
 };
 use zxcvbn::zxcvbn;
 
@@ -72,10 +73,16 @@ fn main() -> Result<()> {
                     println!("not verified");
                 }
             }
+            TextSubCommand::GenerateNonce(opts) => {
+                let nonce = process_text_nonce_generate()?;
+                for (k, v) in nonce {
+                    fs::write(opts.output_path.join(k), v)?;
+                }
+            }
             TextSubCommand::Encrypt(opts) => {
                 let mut reader = get_reader(&opts.input)?;
                 let key = opts.key.into_bytes();
-                let encrypt = process_text_encrypt(&mut reader, &key)?;
+                let encrypt = process_text_encrypt(&mut reader, &key, &opts.nonce)?;
                 let encrypt = URL_SAFE_NO_PAD.encode(encrypt);
                 println!("encrypt:{}", encrypt);
             }
@@ -83,7 +90,7 @@ fn main() -> Result<()> {
                 let reader = get_content(&opts.input)?;
                 let mut reader = URL_SAFE_NO_PAD.decode(reader)?;
                 let key = opts.key.into_bytes();
-                let decrypt = process_text_decrypt(&mut reader, &key)?;
+                let decrypt = process_text_decrypt(&mut reader, &key, &opts.nonce)?;
                 println!("decrypt:{}", String::from_utf8(decrypt)?);
             }
         },

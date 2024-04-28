@@ -10,7 +10,8 @@ use clap::Parser;
 pub use csv_opts::{CsvOpts, OutputFormat};
 pub use genpass_opts::GenPassOpts;
 pub use text_opts::{
-    TextDecryptOpt, TextEncryptOpt, TextSignFormat, TextSignOpt, TextSubCommand, TextVerifyOpt,
+    NonceGenerateOpt, TextDecryptOpt, TextEncryptOpt, TextSignFormat, TextSignOpt, TextSubCommand,
+    TextVerifyOpt,
 };
 
 #[derive(Debug, Parser)]
